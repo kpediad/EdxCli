@@ -5,33 +5,28 @@ class EdxCli::Cli
 
   def run #Program start
     puts "Welcome to the EdX starting soon programs!"
-    puts "Please wait while retrieving info from EdX. This will take some time."
-    get_programs
-    display_programs
+    display(get_programs)
     select_action
   end
 
   def get_programs
-    programs = EdxCli::Scraper.scrape_programs(EDX_PROGRAMS_URL)
-    EdxCli::Program.create_from_collection(programs)
+    EdxCli::Program.all ||= EdxCli::Program.create_from_collection(EdxCli::Scraper.scrape_programs(EDX_PROGRAMS_URL))
   end
 
   def get_courses(prog_num)
     EdxCli::Program.all[prog_num-1].courses ||= EdxCli::Course.create_from_collection(EdxCli::Scraper.scrape_courses(EdxCli::Program.all[prog_num-1].url))
   end
 
-  def display_programs
+  def display(items)
     system "clear"
-    puts "Unfortunately, it seems that there are no upcoming programs on EdX." if EdxCli::Program.all.count == 0
-    EdxCli::Program.all.each.with_index do |program, i|
+    puts "No programs / courses to display!" if items.count == 0
+    items.each.with_index do |item, i|
       if i < 9
-        puts "#{i+1}.  Title: #{program.title}"
+        puts "#{i+1}.  Title: #{item.title}"
       else
-        puts "#{i+1}. Title: #{program.title}"
+        puts "#{i+1}. Title: #{item.title}"
       end
-      puts "    #{program.school}"
-      puts "    #{program.availability}"
-      program.description.split(" ").each_slice(WORD_COUNT).with_index do |slice, i|
+      item.description.split(" ").each_slice(WORD_COUNT).with_index do |slice, i|
         part = slice.to_a.join(" ")
         if i == 0
           puts "    Description: #{part}"
@@ -39,29 +34,13 @@ class EdxCli::Cli
           puts "                 #{part}"
         end
       end
-      puts
-    end
-  end
-
-  def display_courses(courses)
-    system "clear"
-    puts "Apparently there are no courses for this program or an error occured." if courses.count == 0
-    courses.each.with_index do |course, i|
-      if i < 9
-        puts "#{i+1}.  Title: #{course.title}"
+      if item.is_a?(EdxCli::Program)
+        puts "    #{item.school}"
+        puts "    #{item.availability}"
       else
-        puts "#{i+1}. Title: #{course.title}"
+        puts "    #{item.start}"
       end
-        course.description.split(" ").each_slice(WORD_COUNT).with_index do |slice, i|
-          part = slice.to_a.join(" ")
-          if i == 0
-            puts "    Description: #{part}"
-          else
-            puts "                 #{part}"
-          end
-        end
-        puts "    #{course.start}"
-        puts
+      puts
     end
   end
 
@@ -72,14 +51,13 @@ class EdxCli::Cli
       input = gets.strip
       case input
       when "list"
-        display_programs
+        display(get_programs)
         message = "Type program number for details, 'list' to relist programs or 'exit' to leave"
       when "exit"
         break
       else
         if message == "Type program number for details, 'list' to relist programs or 'exit' to leave" && (1..EdxCli::Program.all.count).include?(input.to_i)
-          courses = get_courses(input.to_i)
-          display_courses(courses)
+          display(get_courses(input.to_i))
           message = "Type 'list' to relist programs or exit to leave the program"
         end
       end

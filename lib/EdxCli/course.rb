@@ -9,4 +9,5 @@ class EdxCli::Course
   def self.create_from_collection(courses)
     courses.collect{|course_hash| EdxCli::Course.new(course_hash)}
   end
+  
 end
