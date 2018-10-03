@@ -2,7 +2,7 @@ class EdxCli::Program
 
   @@all = []
 
-  attr_accessor :title, :description, :school, :num_of_courses, :duration, :url, :courses
+  attr_accessor :title, :description, :school, :availability, :url, :courses
 
   def initialize(prog_hash)
     prog_hash.each{|attr_name, attr_value| self.send(attr_name.to_s + "=", attr_value)}

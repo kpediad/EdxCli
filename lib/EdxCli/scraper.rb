@@ -1,35 +1,32 @@
 class EdxCli::Scraper
 
   def self.scrape_programs(url)
-    doc = Nokogiri::HTML(open(url))
-    program_list = doc.css(".m-card")
+    browser = Watir::Browser.start(url, :firefox, headless: true)
+    doc = Nokogiri::HTML(browser.html)
+    browser.close
+    program_list = doc.css(".course-card")
     #binding.pry
     program_list.collect do |program|
-      {title: program.css(".m-card__title").text.strip,
-       school: program.css("div .a-item-title").text.strip,
-       description: program.css(".m-card__intro").text.strip,
-       num_of_courses: program.css(".m-card__metadata-label").first.text.strip,
-       duration: program.css(".m-card__metadata-label").last.text.strip,
-       url: program.css("a").first["href"]}
+      {title: program.css(".title-heading").text.strip,
+       school: program.css(".label").text.strip,
+       description: program.css(".ellipsis-overflowing-child").text.strip,
+       availability: program.css(".availability").text.strip,
+       url: program.css("a").attribute("href").value}
      end
    end
 
   def self.scrape_courses(url)
-    doc = Nokogiri::HTML(open(url))
-    course_list = doc.css(".m-card")
+    puts "Please wait while retrieving courses. This will take some time."
+    browser = Watir::Browser.start(url, :firefox, headless: true)
+    doc = Nokogiri::HTML(browser.html)
+    browser.close
+    course_list = doc.css(".enroll-card")
     #binding.pry
     course_list.collect do |course|
-      if course.css(".m-card__metadata-label").first
-        {title: course.css(".m-card__title").text.strip,
-         school: course.css("div .a-item-title").text.strip,
-         description: course.css(".m-card__intro").text.strip,
-         duration: course.css(".m-card__metadata-label").first.text.strip,
-         effort: course.css(".m-card__metadata-label").last.text.strip}
-       else
-         {title: course.css(".m-card__title").text.strip,
-          school: course.css("div .a-item-title").text.strip,
-          description: course.css(".m-card__intro").text.strip}
-        end
+      {title: course.css(".course-title").text.strip,
+       description: course.css(".subtitle").text.strip,
+       start: course.css(".course-start").first.text.strip,
+       url: course.css("a").attribute("href").value}
      end
   end
 

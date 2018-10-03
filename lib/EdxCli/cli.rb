@@ -1,10 +1,11 @@
 class EdxCli::Cli
 
-  BASE_URL = "https://www.futurelearn.com/"
-  EDX_PROGRAMS_URL = "https://www.futurelearn.com/programs"
+  EDX_PROGRAMS_URL = "https://www.edx.org/course/?program=all&availability=starting_soon"
+  WORD_COUNT = 6
 
   def run #Program start
-    system "clear"
+    puts "Welcome to the EdX starting soon programs!"
+    puts "Please wait while retrieving info from EdX. This will take some time."
     get_programs
     display_programs
     select_action
@@ -16,10 +17,11 @@ class EdxCli::Cli
   end
 
   def get_courses(prog_num)
-    EdxCli::Program.all[prog_num-1].courses ||= EdxCli::Course.create_from_collection(EdxCli::Scraper.scrape_courses(BASE_URL + EdxCli::Program.all[prog_num-1].url))
+    EdxCli::Program.all[prog_num-1].courses ||= EdxCli::Course.create_from_collection(EdxCli::Scraper.scrape_courses(EdxCli::Program.all[prog_num-1].url))
   end
 
   def display_programs
+    system "clear"
     puts "Unfortunately, it seems that there are no upcoming programs on EdX." if EdxCli::Program.all.count == 0
     EdxCli::Program.all.each.with_index do |program, i|
       if i < 9
@@ -27,9 +29,16 @@ class EdxCli::Cli
       else
         puts "#{i+1}. Title: #{program.title}"
       end
-      puts "    School: #{program.school}"
-      puts "    Courses: #{program.num_of_courses}"
-      puts "    Duration: #{program.duration}"
+      puts "    #{program.school}"
+      puts "    #{program.availability}"
+      program.description.split(" ").each_slice(WORD_COUNT).with_index do |slice, i|
+        part = slice.to_a.join(" ")
+        if i == 0
+          puts "    Description: #{part}"
+        else
+          puts "                 #{part}"
+        end
+      end
       puts
     end
   end
@@ -43,13 +52,16 @@ class EdxCli::Cli
       else
         puts "#{i+1}. Title: #{course.title}"
       end
-      if course.duration && course.effort
-        puts "    School: #{course.school}"
-        puts "    Duration: #{course.duration}"
-        puts "    Effort: #{course.effort}"
-      end
-      puts "    Description: #{course.description}"
-      puts
+        course.description.split(" ").each_slice(WORD_COUNT).with_index do |slice, i|
+          part = slice.to_a.join(" ")
+          if i == 0
+            puts "    Description: #{part}"
+          else
+            puts "                 #{part}"
+          end
+        end
+        puts "    #{course.start}"
+        puts
     end
   end
 
