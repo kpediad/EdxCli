@@ -1,8 +1,8 @@
 # EdxCli
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/EdxCli`. To experiment with that code, run `bin/console` for an interactive prompt.
+Welcome to EdxCli! This is a ruby based CLI application/gem that was developed as part of an assignment. It uses [Watir](http://watir.com/) and nokogiri to scrape the [EdX](https://www.edx.org/course/?program=all&availability=starting_soon) starting soon programs and present them to the user through the console. Additionally, the user has the ability to drill down on each of the programs presented to view the courses contained in each.
 
-TODO: Delete this and the text above, and describe your gem
+Please note that the use of Watir slows things down considerably, however no unnecessary web accesses are performed unless absolutely required. Have fun!
 
 ## Installation
 
@@ -20,9 +20,13 @@ Or install it yourself as:
 
     $ gem install EdxCli
 
+Moreover you need [mozilla/geckodriver](https://github.com/mozilla/geckodriver/releases) installed on your machine for this application/gem to work. Go to the above website and download the latest release for your operating system, extract and add the driver to your PATH so that it can be accessed by other tools. You may need to grant execution permission rights for the extracted file.
+
 ## Usage
 
-TODO: Write usage instructions here
+From within the `EdxCli` directory type the following command to run the application:
+
+    `$ ./bin/EdxCli`
 
 ## Development
 
